@@ -146,7 +146,7 @@ actor_plot <- function(actor) {
 actor_plot("Hugo Weaving")
 actor_plot("Marion Cotillard")
 actor_plot("Helena Bonham Carter")
-actor_plot("Daniel Day-Lewis")
+actor_plot("Eddie Murphy")
 
 
 
