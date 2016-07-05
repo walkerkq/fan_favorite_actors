@@ -27,7 +27,7 @@ movies2 <- movies2[!is.na(movies2$tomatoMeter) & !is.na(movies2$tomatoUserMeter)
 
 # keep actors with at least 10 movies
 threshold <- data.frame(table(movies2$Actor))
-threshold <- threshold[threshold$Freq > 5, ]
+threshold <- threshold[threshold$Freq > 10, ]
 movies2 <- movies2[movies2$Actor %in% threshold$Var1, ]
 
 # get difference between user and critic score for each movie
@@ -35,6 +35,7 @@ movies2$Difference <- movies2$tomatoUserMeter - movies2$tomatoMeter
 
 ######## GET TA PLOTTIN
 library(ggplot2)
+library(ggrepel)
 library(gridExtra)
 
 scoreMedians <- NULL
@@ -57,7 +58,7 @@ fit <- lm(tomatoUserMeter ~ tomatoMeter, movies2) # R-sq is only 0.54, slope is 
 resid <- data.frame(Title=movies2$Title, tomatoMeter=movies2$tomatoMeter, Residual=fit$residuals)
 resid <- resid[order(-resid$Residual), ]
 resid <- resid[!duplicated(resid), ]
-ggplot(movies2, aes(tomatoMeter, tomatoUserMeter)) + geom_point(color="cadetblue", size=4, alpha=.5) + 
+ggplot(movies2, aes(tomatoMeter, tomatoUserMeter)) + geom_point(color="#1f77b4", size=4, alpha=.5) + 
      theme_classic(base_size=16) + labs(title="Audience vs. Critic Scores, Movies") +
      xlab("Critic Score") + ylab("Audience Score") + 
      geom_abline(intercept=0, slope=1, linetype=2) + ylim(c(0,100)) +
@@ -87,9 +88,9 @@ ggplot(movies2, aes(Difference)) + geom_histogram(bins=25, fill="cadetblue") +
 #####################
 # most over/underrated
 for(b in seq_along(scoreMedians$Actor)){
-     if(scoreMedians$DifferenceMedian[b] > 3){
+     if(scoreMedians$DifferenceMedian[b] > 2){
           scoreMedians$Group[b] <- "Audiences Prefer"
-     } else if(scoreMedians$DifferenceMedian[b] < -3){
+     } else if(scoreMedians$DifferenceMedian[b] < -2){
           scoreMedians$Group[b] <- "Critics Prefer"
      } else {
           scoreMedians$Group[b] <- "Agree"
@@ -97,29 +98,29 @@ for(b in seq_along(scoreMedians$Actor)){
 }
 scoreMedians <- scoreMedians[order(-scoreMedians$DifferenceMedian), ]
 scoreMedians$Actor <- factor(scoreMedians$Actor, levels=scoreMedians$Actor)
-over <- ggplot(scoreMedians[45:54, ], aes(Actor, DifferenceMedian)) + 
-    geom_bar(stat="identity", fill="cadetblue") + 
-     coord_flip() + theme_classic() + theme(plot.title=element_text(size=16)) +
-     xlab("") + labs(title="Top 10 Most Overrated Actors") + 
+over <- ggplot(tail(scoreMedians,5), aes(Actor, DifferenceMedian)) + 
+    geom_bar(stat="identity", fill="#b2df8a") +
+     coord_flip() + theme_classic(base_size=14) + theme(plot.title=element_text(size=16)) +
+     xlab("") + labs(title="Top 5 Most Overrated Actors") + 
      ylab("Median Difference Between Audience and Critic Scores") 
 
 scoreMedians <- scoreMedians[order(scoreMedians$DifferenceMedian), ]
 scoreMedians$Actor <- factor(scoreMedians$Actor, levels=scoreMedians$Actor)
-under <- ggplot(scoreMedians[45:54, ], aes(Actor, DifferenceMedian)) + 
-    geom_bar(stat="identity", fill="cadetblue") + 
-    coord_flip() + theme_classic() + theme(plot.title=element_text(size=16)) +
-    xlab("") + labs(title=" Top 10 Most Underrated Actors") + 
+under <- ggplot(tail(scoreMedians,5), aes(Actor, DifferenceMedian)) + 
+    geom_bar(stat="identity", fill="#1f77b4")  +
+    coord_flip() + theme_classic(base_size=14) + theme(plot.title=element_text(size=16)) +
+    xlab("") + labs(title=" Top 5 Most Underrated Actors") + 
     ylab("Median Difference Between Audience and Critic Scores") 
 grid.arrange(over, under, ncol=2)
 
 
 #####################
 # scatterplot actors
-ggplot(scoreMedians, aes(CalculatedCritic, UserMedian)) + geom_point(color="cadetblue", size=4) + 
-    theme_classic(base_size=16) +
+ggplot(scoreMedians, aes(CalculatedCritic, UserMedian)) + geom_point(aes(color=Group), size=4) + 
+    theme_classic(base_size=16) + scale_color_brewer(palette="Paired") + scale_fill_brewer(palette="Paired") +
     geom_abline(intercept=0, slope=1, linetype=2, color="gray50") +
-     geom_label_repel(aes(label=Actor), size=3, color="gray20",
-                      label.padding=unit(0.1, "lines"),
+     geom_label_repel(aes(label=Actor, fill=Group), size=3.5, color="white", fontface="bold", 
+                      label.padding=unit(0.15, "lines"),
                       label.size=0.1,
                       point.padding=unit(0.1, "lines")) +
      xlim(c(30,100)) + ylim(c(40,85)) + 
@@ -147,11 +148,6 @@ actor_plot("Hugo Weaving")
 actor_plot("Marion Cotillard")
 actor_plot("Helena Bonham Carter")
 actor_plot("Eddie Murphy")
-
-
-
-
-
 
 
 

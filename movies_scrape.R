@@ -45,17 +45,25 @@ actors <- rbind(moneyActors, oscarActors)
 movieLinks <- data.frame()
 
 for(j in seq_along(actors$Link)){
-     URL <- paste("http://www.imdb.com/name/", actors$Link[j], sep="")
-     result <- htmlTreeParse(getURL(URL, followlocation=TRUE), useInternal=TRUE)
-     movies <- data.frame(Title=c(xpathSApply(result, "//div[@id='filmography']//b//a", xmlValue)), 
-                          Link=c(xpathSApply(result, "//div[@id='filmography']//b//a", xmlGetAttr, "href")))
-     number <- xpathSApply(result, "//div[@id='filmo-head-actor']", xmlValue)
-     if(length(number)==0){number <- xpathSApply(result, "//div[@id='filmo-head-actress']", xmlValue) }
-     number <- as.numeric(gsub("[^0-9]+", "", number))
-     movies <- movies[1:number,]
-     movies$Actor <- actors$Name[j]
-     movies$Source <- actors$Source[j]
-     movieLinks <- rbind(movieLinks, movies)
+    URL <- paste("http://www.imdb.com/name/", actors$Link[j], sep="")
+    result <- htmlTreeParse(getURL(URL, followlocation=TRUE), useInternal=TRUE)
+    movies <- data.frame(Title=c(xpathSApply(result, "//div[@id='filmography']//b//a", xmlValue)), 
+                         Link=c(xpathSApply(result, "//div[@id='filmography']//b//a", xmlGetAttr, "href")))
+    number <- xpathSApply(result, "//div[@id='filmo-head-actor']", xmlValue)
+    if(length(number)==0){number <- xpathSApply(result, "//div[@id='filmo-head-actress']", xmlValue) }
+    number <- as.numeric(gsub("[^0-9]+", "", number))
+    if(actors$Name[j] %in% c("Tom Hanks", "Jon Favreau")) {
+        # check for producer credits 
+        prodnum <- xpathSApply(result, "//div[@id='filmo-head-producer']", xmlValue)
+        prodnum <- as.numeric(gsub("[^0-9]+", "", prodnum))
+    }
+    if(length(prodnum)>0) {
+        movies <- movies[(prodnum+1):(prodnum+number), ]
+    } else { movies <- movies[1:number,] }
+    prodnum <- NULL
+    movies$Actor <- actors$Name[j]
+    movies$Source <- actors$Source[j]
+    movieLinks <- rbind(movieLinks, movies)
 }
 movieLinks$Link <- substring(movieLinks$Link, 8, 16)
 
