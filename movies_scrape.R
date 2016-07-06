@@ -46,38 +46,40 @@ otherActors <- data.frame(Name=c(
      "Aaron Eckhart", "Joseph Gordon-Levitt", "Ryan Gosling", "Steve Martin", "Meg Ryan",
      "Diane Lane", "Richard Gere", "Rachel McAdams", "Dennis Quaid", "Heath Ledger",
      "Al Pacino", "Jim Carrey", "Drew Barrymore", "Gwenyth Paltrow", "John Cusack",
-     "Nicolas Cage", "Kirsten Dunst", "Eva Mendes", "Kate Hudson", "Hugh Jackman",
-     "Joaquin Phoenix", "Jennifer Garner", "Michelle Pfieffer", "Amy Adams", "Adam Sandler",
-     "Anne Hathaway", "Angelina Jolie", "Ryan Reynolds", "Jennifer Aniston", "Amanda Seyfried",
+     "Nicolas Cage", "Dwayne Johnson", "Eva Mendes", "Kate Hudson", "Hugh Jackman",
+     "Joaquin Phoenix", "Jennifer Garner", "Michelle Pfieffer", "Patrick Swayze", "Adam Sandler",
+     "Anne Hathaway", "Angelina Jolie", "Ryan Reynolds", "Jennifer Aniston", "Jackie Chan",
      "Megan Fox", "Shia LaBeouf", "Jack Black", "Keanu Reeves", "Kiera Knightley", 
-     "John Goodman", "Bradley Cooper", "Jessica Alba", "Arnold Schwarzennegger", "Chris Pine",
-     "Chris Evans", "Signourney Weaver", "Ethan Hawke", "Liam Helmsworth", "Chris Helmsworth"
+     "John Goodman", "Bradley Cooper", "Jessica Alba", "Arnold Schwarzenegger", "Jeff Daniels",
+     "Chris Evans", "Signourney Weaver", "Ethan Hawke", "Chris Farley", "David Spade",
+     "Kristen Stewart", "Vin Diesel", "Anna Kendrick", "Miles Teller", "Vince Vaughn", 
+     "John Travlota", "Kevin Costner", "Ray Liotta", "Daniel Craig", "Pierce Brosnan",
+     "Mike Myers", "Danny DeVito", "Michael Douglas", "Clint Eastwood", "Sean Bean"
      ), Link=c(
      "nm0000226", "nm0000123", "nm0000093", "nm0000210", "nm0000197", 
      "nm0001774", "nm0002071", "nm0736622", "nm0000288", "nm0124930", 
      "nm0000134", "nm0000242", "nm0136797", "nm0001570", "nm0000982", 
      "nm0001173", "nm0330687", "nm0331516", "nm0000188", "nm0000212",
-     "Diane Lane", "Richard Gere", "Rachel McAdams", "Dennis Quaid", "Heath Ledger",
-     "Al Pacino", "Jim Carrey", "Drew Barrymore", "Gwenyth Paltrow", "John Cusack",
-     "Nicolas Cage", "Duane Johnson", "Eva Mendes", "Kate Hudson", "Hugh Jackman",
-     "Joaquin Phoenix", "Jennifer Garner", "Michelle Pfieffer", "Amy Adams", "Adam Sandler",
-     "Anne Hathaway", "Angelina Jolie", "Ryan Reynolds", "Jennifer Aniston", "Amanda Seyfried",
-     "Megan Fox", "Shia LaBeouf", "Jack Black", "Keanu Reeves", "Kiera Knightley", 
-     "John Goodman", "Bradley Cooper", "John Candy", "Arnold Schwarzennegger", "Chris Pine",
-     "Chris Evans", "Signourney Weaver", "Ethan Hawke", "Chris Farley", "David Spade"
-     ), Number=c(1:60), Source=rep("Misc", 60))
-
-
-
-
+     "nm0000178", "nm0000152", "nm1046097", "nm0000598", "nm0005132",
+     "nm0000199", "nm0000120", "nm0000106", "nm0000569", "nm0000131",
+     "nm0000115", "nm0425005", "nm0578949", "nm0005028", "nm0413168",
+     "nm0001618", "nm0004950", "nm0000201", "nm0000664", "nm0001191",
+     "nm0004266", "nm0001401", "nm0005351", "nm0000098", "nm0000329",
+     "nm1083271", "nm0479471", "nm0085312", "nm0000206", "nm0461136", 
+     "nm0000422", "nm0177896", "nm0001006", "nm0000216", "nm0001099",
+     "nm0262635", "nm0000244", "nm0000160", "nm0000394", "nm0005450",
+     "nm0829576", "nm0004874", "nm0447695", "nm1886602", "nm0000681", 
+     "nm0000237", "nm0000126", "nm0000501", "nm0185819", "nm0000112",
+     "nm0000196", "nm0000362", "nm0000140", "nm0000142", "nm0000293"
+     ), Number=c(1:75), Source=rep("Misc", 75))
 
 # BOTH!
-actors <- rbind(moneyActors, oscarActors)
- ### wahlberg has producer credits, steve martin has 'writer'
+actors <- rbind(moneyActors, oscarActors, otherActors)
+
 # get imdb IDs
 movieLinks <- data.frame()
-
-for(j in seq_along(actors$Link)){
+for(j in seq_along(actors$Link)){  
+    prodnum <- NULL
     URL <- paste("http://www.imdb.com/name/", actors$Link[j], sep="")
     result <- htmlTreeParse(getURL(URL, followlocation=TRUE), useInternal=TRUE)
     movies <- data.frame(Title=c(xpathSApply(result, "//div[@id='filmography']//b//a", xmlValue)), 
@@ -85,15 +87,18 @@ for(j in seq_along(actors$Link)){
     number <- xpathSApply(result, "//div[@id='filmo-head-actor']", xmlValue)
     if(length(number)==0){number <- xpathSApply(result, "//div[@id='filmo-head-actress']", xmlValue) }
     number <- as.numeric(gsub("[^0-9]+", "", number))
-    if(actors$Name[j] %in% c("Tom Hanks", "Jon Favreau")) {
+    if(actors$Name[j] %in% c("Tom Hanks", "Jon Favreau", "Drew Barrymore", "Mark Wahlberg")) {
         # check for producer credits 
         prodnum <- xpathSApply(result, "//div[@id='filmo-head-producer']", xmlValue)
+        prodnum <- as.numeric(gsub("[^0-9]+", "", prodnum))
+    }else if(actors$Name[j] %in% c("Steve Martin")){
+        # check for writer credits 
+        prodnum <- xpathSApply(result, "//div[@id='filmo-head-writer']", xmlValue)
         prodnum <- as.numeric(gsub("[^0-9]+", "", prodnum))
     }
     if(length(prodnum)>0) {
         movies <- movies[(prodnum+1):(prodnum+number), ]
     } else { movies <- movies[1:number,] }
-    prodnum <- NULL
     movies$Actor <- actors$Name[j]
     movies$Source <- actors$Source[j]
     movieLinks <- rbind(movieLinks, movies)

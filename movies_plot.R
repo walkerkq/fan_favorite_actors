@@ -1,4 +1,4 @@
-setwd("/Users/kaylinwalker/R/fan_favorite_actors")
+setwd("/Users/kwalker/git_projects/fan_favorite_actors")
 movies <- read.csv("movieInfo.csv", stringsAsFactors=FALSE)
 
 # make numeric
@@ -12,7 +12,9 @@ keeps <- NULL
 for(x in seq_along(movies$ID)){
      first <- strsplit(movies$Actors[x], ", ")[[1]][1]
      second <- strsplit(movies$Actors[x], ", ")[[1]][2]
-     if(movies$Actor[x] %in% c(first,second)) {
+     third <- strsplit(movies$Actors[x], ", ")[[1]][3]
+     fourth <- strsplit(movies$Actors[x], ", ")[[1]][4]
+     if(movies$Actor[x] %in% c(first, second, third, fourth)) {
           keeps <- c(keeps, x)
      }
 }
@@ -116,24 +118,25 @@ grid.arrange(over, under, ncol=2)
 
 #####################
 # scatterplot actors
+myColors <- c("#b2df8a", "#1f77b4", "#a6cee3")
 ggplot(scoreMedians, aes(CalculatedCritic, UserMedian)) + geom_point(aes(color=Group), size=4) + 
-    theme_classic(base_size=16) + scale_color_brewer(palette="Paired") + scale_fill_brewer(palette="Paired") +
+    theme_classic(base_size=16) + scale_color_manual(values=myColors) + scale_fill_manual(values=myColors) +
     geom_abline(intercept=0, slope=1, linetype=2, color="gray50") +
-     geom_label_repel(aes(label=Actor, fill=Group), size=3.5, color="white", fontface="bold", 
+     geom_label_repel(data=subset(scoreMedians, DifferenceMedian > 7 | DifferenceMedian <= -5 | UserMedian > 70 | UserMedian < 50), 
+                      aes(label=Actor, fill=Group), size=3.5, color="white", fontface="bold", 
                       label.padding=unit(0.15, "lines"),
                       label.size=0.1,
                       point.padding=unit(0.1, "lines")) +
-     xlim(c(30,100)) + ylim(c(40,85)) + 
-     ylab("Audience Score") + xlab("Critic Score") + labs(title="Audience vs. Critic Scores, Actors") +
-     annotate("text", x=35, y=85, label="Audience Favorites", size=5, hjust=0, color="gray20") +
-     annotate("text", x=95, y=45, label="Critic Favorites", size=5, hjust=1, color="gray20") 
+     xlim(c(15,100)) + ylim(c(40,85)) + 
+     ylab("Audience Score") + xlab("Critic Score") + labs(title="Audience vs. Critic Scores, Actors") + 
+     theme(legend.position="none")
 
 #####################
 # look at individual actors
 actor_plot <- function(actor) { 
      movieplot <- movies2[movies2$Actor==actor, ]
      movieplot <- movieplot[ ,c(4,5,13,15,20)]
-     movieplot <- movieplot[order(movieplot$Year),]
+     movieplot <- movieplot[order(-movieplot$Year),]
      movieplot$Title <- sapply(movieplot$Title, function(x) strsplit(x, ": ")[[1]][1])
      movieplot$Review <- paste(movieplot$Title, " (", movieplot$Year, ")", sep="")
      movieplot$Review <- factor(movieplot$Review, levels=movieplot$Review)
@@ -143,20 +146,21 @@ actor_plot <- function(actor) {
           geom_point(aes(x=tomatoMeter, y=Review, color="Critic"), size=4, shape=15) +
           geom_point(aes(x=tomatoUserMeter, y=Review, color="Audience"), size=4, shape=15) +
           xlab("Score") + ylab("") + labs(title=paste("Movies Starring", actor, sep=" ")) +
-          xlim(c(0,100)) + coord_flip() + theme(axis.text.x = element_text(angle = 70, hjust = 1)) 
+          xlim(c(0,100)) 
      
 }
-actor_plot("Halle Berry")
-actor_plot("Sandra Bullock")
-actor_plot("Gary Oldman")
-actor_plot("Elizabeth Banks")
-actor_plot("Bruce Willis")
-actor_plot("Eddie Murphy")
-actor_plot("Helena Bonham Carter")
-actor_plot("Daniel Day-Lewis")
-actor_plot("Scarlett Johansson")
-actor_plot("Willem Dafoe")
-actor_plot("Jeff Bridges")
+actor_plot("David Spade")
+actor_plot("Adam Sandler")
+actor_plot("Gerard Butler")
+actor_plot("Ryan Reynolds")
+actor_plot("Kate Hudson")
+
+actor_plot("Hugo Weaving")
+actor_plot("Seth Rogen")
+actor_plot("Jack Nicholson")
+actor_plot("Clint Eastwood")
+actor_plot("Anna Kendrick")
+
 
 #####################
 ##### which actors had a lot of small roles not included?
