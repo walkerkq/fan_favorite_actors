@@ -38,9 +38,42 @@ oscarActors <- data.frame(Name=c(
      Source=rep("Oscars", 30)
 )
 
+# or Misc.?
+otherActors <- data.frame(Name=c(
+     "Will Smith", "George Clooney", "Brad Pitt", "Julia Roberts", "Jack Nicholson", 
+     "Ben Stiller", "Will Ferrell", "Seth Rogen", "Christian Bale", "Gerard Butler", 
+     "Robert De Niro", "Mark Wahlberg", "Steve Carrell", "Edward Norton", "Josh Brolin", 
+     "Aaron Eckhart", "Joseph Gordon-Levitt", "Ryan Gosling", "Steve Martin", "Meg Ryan",
+     "Diane Lane", "Richard Gere", "Rachel McAdams", "Dennis Quaid", "Heath Ledger",
+     "Al Pacino", "Jim Carrey", "Drew Barrymore", "Gwenyth Paltrow", "John Cusack",
+     "Nicolas Cage", "Kirsten Dunst", "Eva Mendes", "Kate Hudson", "Hugh Jackman",
+     "Joaquin Phoenix", "Jennifer Garner", "Michelle Pfieffer", "Amy Adams", "Adam Sandler",
+     "Anne Hathaway", "Angelina Jolie", "Ryan Reynolds", "Jennifer Aniston", "Amanda Seyfried",
+     "Megan Fox", "Shia LaBeouf", "Jack Black", "Keanu Reeves", "Kiera Knightley", 
+     "John Goodman", "Bradley Cooper", "Jessica Alba", "Arnold Schwarzennegger", "Chris Pine",
+     "Chris Evans", "Signourney Weaver", "Ethan Hawke", "Liam Helmsworth", "Chris Helmsworth"
+     ), Link=c(
+     "nm0000226", "nm0000123", "nm0000093", "nm0000210", "nm0000197", 
+     "nm0001774", "nm0002071", "nm0736622", "nm0000288", "nm0124930", 
+     "nm0000134", "nm0000242", "nm0136797", "nm0001570", "nm0000982", 
+     "nm0001173", "nm0330687", "nm0331516", "nm0000188", "nm0000212",
+     "Diane Lane", "Richard Gere", "Rachel McAdams", "Dennis Quaid", "Heath Ledger",
+     "Al Pacino", "Jim Carrey", "Drew Barrymore", "Gwenyth Paltrow", "John Cusack",
+     "Nicolas Cage", "Duane Johnson", "Eva Mendes", "Kate Hudson", "Hugh Jackman",
+     "Joaquin Phoenix", "Jennifer Garner", "Michelle Pfieffer", "Amy Adams", "Adam Sandler",
+     "Anne Hathaway", "Angelina Jolie", "Ryan Reynolds", "Jennifer Aniston", "Amanda Seyfried",
+     "Megan Fox", "Shia LaBeouf", "Jack Black", "Keanu Reeves", "Kiera Knightley", 
+     "John Goodman", "Bradley Cooper", "John Candy", "Arnold Schwarzennegger", "Chris Pine",
+     "Chris Evans", "Signourney Weaver", "Ethan Hawke", "Chris Farley", "David Spade"
+     ), Number=c(1:60), Source=rep("Misc", 60))
+
+
+
+
+
 # BOTH!
 actors <- rbind(moneyActors, oscarActors)
-
+ ### wahlberg has producer credits, steve martin has 'writer'
 # get imdb IDs
 movieLinks <- data.frame()
 
