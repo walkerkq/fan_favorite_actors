@@ -1,4 +1,4 @@
-setwd("/Users/kwalker/git_projects/fan_favorite_actors")
+setwd("/Users/kaylinwalker/R/fan_favorite_actors")
 movies <- read.csv("movieInfo.csv", stringsAsFactors=FALSE)
 
 # make numeric
@@ -133,25 +133,45 @@ ggplot(scoreMedians, aes(CalculatedCritic, UserMedian)) + geom_point(aes(color=G
 actor_plot <- function(actor) { 
      movieplot <- movies2[movies2$Actor==actor, ]
      movieplot <- movieplot[ ,c(4,5,13,15,20)]
-     movieplot <- movieplot[order(movieplot$tomatoUserMeter),]
-     movieplot$Title <- factor(movieplot$Title, levels=movieplot$Title)
-     
-     ggplot(movieplot, aes(color=Title)) + theme_classic() + scale_color_brewer(palette="Paired") +
-          geom_segment(aes(x=tomatoMeter, xend=tomatoUserMeter, y=Title, yend=Title), color="#20687d", size=1) +
-          geom_point(aes(x=tomatoMeter, y=Title, color="Critic"), size=4, shape=15) +
-          geom_point(aes(x=tomatoUserMeter, y=Title, color="Audience"), size=4, shape=15) +
-          xlab("Score") + ylab("") + labs(title=paste("Movies Starring", actor, "\nRanked by Audience Score", sep=" ")) +
-          xlim(c(0,100)) 
+     movieplot <- movieplot[order(movieplot$Year),]
+     movieplot$Title <- sapply(movieplot$Title, function(x) strsplit(x, ": ")[[1]][1])
+     movieplot$Review <- paste(movieplot$Title, " (", movieplot$Year, ")", sep="")
+     movieplot$Review <- factor(movieplot$Review, levels=movieplot$Review)
+
+     ggplot(movieplot, aes(color=Review)) + theme_classic(base_size=14) + scale_color_brewer(palette="Paired") +
+          geom_segment(aes(x=tomatoMeter, xend=tomatoUserMeter, y=Review, yend=Review), color="#20687d", size=1) +
+          geom_point(aes(x=tomatoMeter, y=Review, color="Critic"), size=4, shape=15) +
+          geom_point(aes(x=tomatoUserMeter, y=Review, color="Audience"), size=4, shape=15) +
+          xlab("Score") + ylab("") + labs(title=paste("Movies Starring", actor, sep=" ")) +
+          xlim(c(0,100)) + coord_flip() + theme(axis.text.x = element_text(angle = 70, hjust = 1)) 
      
 }
-actor_plot("Hugo Weaving")
-actor_plot("Marion Cotillard")
-actor_plot("Helena Bonham Carter")
+actor_plot("Halle Berry")
+actor_plot("Sandra Bullock")
+actor_plot("Gary Oldman")
+actor_plot("Elizabeth Banks")
+actor_plot("Bruce Willis")
 actor_plot("Eddie Murphy")
+actor_plot("Helena Bonham Carter")
+actor_plot("Daniel Day-Lewis")
+actor_plot("Scarlett Johansson")
+actor_plot("Willem Dafoe")
+actor_plot("Jeff Bridges")
 
-
-
-
-
+#####################
+##### which actors had a lot of small roles not included?
+compare <- data.frame(one=table(movies$Actor[movies$Actor %in% unique(movies2$Actor)]), two=table(movies2$Actor))
+compare$Diff <- compare$one.Freq - compare$two.Freq
+compare <- merge(scoreMedians, compare[,c(1,2,5)], by.x="Actor", by.y="one.Var1")
+compare$NonLeading <- round(compare$Diff/compare$one.Freq, 2)
+compare$Leading <- 1-compare$NonLeading
+compare <- compare[order(compare$NonLeading), ]
+compare$Actor <- factor(compare$Actor, levels=compare$Actor)
+comparemelt <- melt(compare[,c(1,12,13)], id="Actor")
+colnames(comparemelt) <- c("Actor", "Role", "Percent")
+ggplot(comparemelt, aes(Actor, Percent)) + geom_bar(stat="identity", aes(fill=Role)) + 
+     coord_flip() + theme_classic(base_size=14) + ylab("") + xlab("") + 
+     labs(title="Breakdown of Non-Leading vs. Leading Roles") + ylim(c(0,1)) + 
+     scale_fill_brewer(palette="Paired")
 
 
