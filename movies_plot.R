@@ -35,11 +35,6 @@ movies2 <- movies2[movies2$Actor %in% threshold$Var1, ]
 # get difference between user and critic score for each movie
 movies2$Difference <- movies2$tomatoUserMeter - movies2$tomatoMeter
 
-######## GET TA PLOTTIN
-library(ggplot2)
-library(ggrepel)
-library(gridExtra)
-
 scoreMedians <- NULL
 for(h in unique(movies2$Actor)){
      subset <- movies2[movies2$Actor==h, ]
@@ -53,6 +48,11 @@ for(h in unique(movies2$Actor)){
      scoreMedians <- rbind(scoreMedians, row)
 }
 scoreMedians$CalculatedCritic <- scoreMedians$UserMedian - scoreMedians$DifferenceMedian
+
+######## GET TA PLOTTIN
+library(ggplot2)
+library(ggrepel)
+library(gridExtra)
 
 #####################
 # movie scatter plot
@@ -103,22 +103,22 @@ scoreMedians$Actor <- factor(scoreMedians$Actor, levels=scoreMedians$Actor)
 over <- ggplot(tail(scoreMedians,5), aes(Actor, DifferenceMedian)) + 
     geom_bar(stat="identity", fill="#b2df8a") +
      coord_flip() + theme_classic(base_size=14) + theme(plot.title=element_text(size=16)) +
-     xlab("") + labs(title="Top 5 Most Overrated Actors") + 
-     ylab("Median Difference Between Audience and Critic Scores") 
+     xlab("") + labs(title="Most Preferred by Critics") + 
+     ylab("Median Difference Between Audience and Critic Scores") + scale_y_reverse()
 
 scoreMedians <- scoreMedians[order(scoreMedians$DifferenceMedian), ]
 scoreMedians$Actor <- factor(scoreMedians$Actor, levels=scoreMedians$Actor)
 under <- ggplot(tail(scoreMedians,5), aes(Actor, DifferenceMedian)) + 
     geom_bar(stat="identity", fill="#1f77b4")  +
     coord_flip() + theme_classic(base_size=14) + theme(plot.title=element_text(size=16)) +
-    xlab("") + labs(title=" Top 5 Most Underrated Actors") + 
-    ylab("Median Difference Between Audience and Critic Scores") 
-grid.arrange(over, under, ncol=2)
+    xlab("") + labs(title="Most Preferred by Audiences") + 
+    ylab("Median Difference Between Audience and Critic Scores") + scale_y_reverse()
+grid.arrange(under, over, ncol=2)
 
 
 #####################
 # scatterplot actors
-myColors <- c("#b2df8a", "#1f77b4", "#a6cee3")
+myColors <- c("#a6cee3", "#1f77b4", "#b2df8a")
 ggplot(scoreMedians, aes(CalculatedCritic, UserMedian)) + geom_point(aes(color=Group), size=4) + 
     theme_classic(base_size=16) + scale_color_manual(values=myColors) + scale_fill_manual(values=myColors) +
     geom_abline(intercept=0, slope=1, linetype=2, color="gray50") +
