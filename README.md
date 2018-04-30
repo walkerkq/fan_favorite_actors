@@ -13,5 +13,5 @@ to collect information (including Metascore, IMDb rating and Rotten Tomatoes rat
 but they are calculated a little differently. The critic score (“tomatometer”) is the percentage of “fresh” critic reviews, while the 
 audience score (“tomatoUserMeter”) is the percentage of user reviews that are at or above 3.5/5. 
 
-[See the results on my blog.](http://kaylinwalker.com/fan-favorite-actors-who-actually-suck/)
+[See the results here.](http://kaylinpavlik.com/fan-favorite-actors-who-actually-suck/)
 
